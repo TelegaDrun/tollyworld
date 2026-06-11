@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TollyWorld — Minecraft Server</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-30px) rotate(1deg); }
+  66% { transform: translateY(-15px) rotate(-1deg); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255,170,0,0.3), 0 0 40px rgba(255,170,0,0.1); }
+  50% { box-shadow: 0 0 30px rgba(255,170,0,0.6), 0 0 60px rgba(255,170,0,0.2); }
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes blockFloat {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.08; }
+  90% { opacity: 0.08; }
+  100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0a0a1a; }
+::-webkit-scrollbar-thumb { background: rgba(255,170,0,0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,170,0,0.5); }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #0a0a1a;
+  color: #fff;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.parallax-bg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 25%, #0a1a2e 50%, #1a0a1a 75%, #0a0a1a 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  z-index: -2;
+}
+
+.stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+.star {
+  position: absolute; width: 3px; height: 3px; background: #fff;
+  border-radius: 50%; animation: twinkle 3s ease-in-out infinite;
+}
+
+.floating-blocks {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: -1; overflow: hidden; pointer-events: none;
+}
+.floating-block {
+  position: absolute; width: 30px; height: 30px;
+  border: 2px solid rgba(255,170,0,0.15); border-radius: 4px;
+  animation: blockFloat 20s linear infinite; opacity: 0;
+}
+.floating-block:nth-child(1) { left: 10%; width: 25px; height: 25px; animation-duration: 18s; animation-delay: 0s; border-color: rgba(255,170,0,0.2); }
+.floating-block:nth-child(2) { left: 25%; width: 35px; height: 35px; animation-duration: 22s; animation-delay: 2s; border-color: rgba(100,200,255,0.15); }
+.floating-block:nth-child(3) { left: 45%; width: 20px; height: 20px; animation-duration: 16s; animation-delay: 4s; border-color: rgba(255,100,100,0.15); }
+.floating-block:nth-child(4) { left: 65%; width: 40px; height: 40px; animation-duration: 24s; animation-delay: 1s; border-color: rgba(100,255,100,0.15); }
+.floating-block:nth-child(5) { left: 80%; width: 28px; height: 28px; animation-duration: 20s; animation-delay: 3s; border-color: rgba(255,170,0,0.2); }
+.floating-block:nth-child(6) { left: 15%; width: 15px; height: 15px; animation-duration: 14s; animation-delay: 5s; border-color: rgba(200,100,255,0.15); }
+.floating-block:nth-child(7) { left: 55%; width: 32px; height: 32px; animation-duration: 19s; animation-delay: 6s; border-color: rgba(255,170,0,0.15); }
+.floating-block:nth-child(8) { left: 90%; width: 22px; height: 22px; animation-duration: 21s; animation-delay: 2.5s; border-color: rgba(100,200,255,0.2); }
+.floating-block:nth-child(9) { left: 35%; width: 18px; height: 18px; animation-duration: 17s; animation-delay: 7s; border-color: rgba(255,100,100,0.15); }
+.floating-block:nth-child(10) { left: 72%; width: 38px; height: 38px; animation-duration: 23s; animation-delay: 4.5s; border-color: rgba(100,255,100,0.15); }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+/* HEADER */
+header {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  position: relative; padding: 40px 20px;
+}
+
+.server-logo {
+  font-size: 4.5rem; font-weight: 800;
+  background: linear-gradient(135deg, #ffaa00, #ff6b00, #ffaa00);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+  margin-bottom: 10px; letter-spacing: 2px;
+}
+
+.server-subtitle {
+  font-size: 1.3rem; color: rgba(255,255,255,0.7);
+  margin-bottom: 30px; font-weight: 400;
+  letter-spacing: 4px; text-transform: uppercase;
+}
+
+.ip-box {
+  display: inline-flex; align-items: center; gap: 15px;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,170,0,0.4);
+  border-radius: 16px; padding: 18px 35px; margin-bottom: 40px;
+  animation: glow 3s ease-in-out infinite;
+  backdrop-filter: blur(10px); transition: all 0.3s;
+}
+.ip-box:hover { border-color: rgba(255,170,0,0.8); transform: scale(1.02); }
+.ip-box .ip-label { font-size: 0.85rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 2px; }
+.ip-box .ip-address { font-size: 1.8rem; font-weight: 700; color: #ffaa00; letter-spacing: 1px; }
+.ip-box .copy-btn {
+  background: rgba(255,170,0,0.2); border: 1px solid rgba(255,170,0,0.4);
+  color: #ffaa00; padding: 8px 18px; border-radius: 8px;
+  cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s;
+}
+.ip-box .copy-btn:hover { background: #ffaa00; color: #0a0a1a; }
+
+.scroll-down { position: absolute; bottom: 40px; animation: float 3s ease-in-out infinite; }
+.scroll-down a { color: rgba(255,255,255,0.3); font-size: 2rem; text-decoration: none; }
+
+/* SECTIONS */
+section { padding: 80px 0; }
+
+.section-title {
+  font-size: 2.5rem; font-weight: 800; text-align: center; margin-bottom: 15px;
+  background: linear-gradient(135deg, #ffaa00, #ff6b00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-subtitle {
+  text-align: center; color: rgba(255,255,255,0.5);
+  font-size: 1.05rem; margin-bottom: 50px;
+}
+
+/* RULES SECTIONS */
+.rules-nav {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+  margin-bottom: 50px; position: sticky; top: 20px; z-index: 10;
+}
+.rules-nav a {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7); padding: 10px 20px; border-radius: 10px;
+  text-decoration: none; font-size: 0.85rem; font-weight: 600;
+  transition: all 0.3s;
+}
+.rules-nav a:hover {
+  background: rgba(255,170,0,0.15); border-color: rgba(255,170,0,0.3); color: #ffaa00;
+}
+
+.rule-section {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  overflow: hidden;
+  transition: all 0.3s;
+  animation: slideUp 0.6s ease forwards;
+  opacity: 0;
+}
+.rule-section:nth-child(1) { animation-delay: 0.1s; }
+.rule-section:nth-child(2) { animation-delay: 0.15s; }
+.rule-section:nth-child(3) { animation-delay: 0.2s; }
+.rule-section:nth-child(4) { animation-delay: 0.25s; }
+.rule-section:nth-child(5) { animation-delay: 0.3s; }
+.rule-section:nth-child(6) { animation-delay: 0.35s; }
+.rule-section:nth-child(7) { animation-delay: 0.4s; }
+.rule-section:nth-child(8) { animation-delay: 0.45s; }
+
+.rule-section:hover { border-color: rgba(255,170,0,0.2); }
+
+.rule-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 30px; cursor: pointer; user-select: none;
+  transition: background 0.3s;
+}
+.rule-section-header:hover { background: rgba(255,170,0,0.04); }
+
+.rule-section-header h3 {
+  font-size: 1.2rem; font-weight: 700; color: #ffaa00;
+  display: flex; align-items: center; gap: 12px;
+}
+.rule-section-header h3 .num { color: rgba(255,255,255,0.2); font-weight: 400; font-size: 0.9rem; }
+
+.rule-section-header .toggle {
+  font-size: 1.3rem; color: rgba(255,255,255,0.3);
+  transition: transform 0.3s; flex-shrink: 0;
+}
+.rule-section.active .rule-section-header .toggle { transform: rotate(180deg); }
+
+.rule-section-body { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
+.rule-section.active .rule-section-body { max-height: none; }
+
+.rule-items { padding: 0 30px 25px; }
+
+.rule-item {
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  line-height: 1.65; font-size: 0.95rem; color: rgba(255,255,255,0.75);
+}
+.rule-item:last-child { border-bottom: none; }
+
+.rule-item .badge {
+  display: inline-block;
+  background: rgba(255,100,100,0.15); color: #ff6b6b;
+  font-size: 0.75rem; font-weight: 700; padding: 2px 10px;
+  border-radius: 6px; margin-top: 6px;
+}
+.rule-item .badge.warn { background: rgba(255,170,0,0.15); color: #ffaa00; }
+.rule-item .badge.perm { background: rgba(255,50,50,0.2); color: #ff3333; }
+
+.rule-item strong { color: #fff; font-weight: 600; }
+
+.mod-list {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;
+  margin-top: 10px;
+}
+.mod-item {
+  background: rgba(255,255,255,0.03); border-radius: 8px;
+  padding: 8px 14px; font-size: 0.9rem; border-left: 3px solid rgba(255,100,100,0.4);
+}
+.mod-item.cheat { border-left-color: rgba(255,50,50,0.7); }
+.mod-item .mod-name { color: #fff; font-weight: 600; }
+.mod-item .mod-punish { color: #ff6b6b; font-size: 0.8rem; margin-left: 8px; }
+
+/* SHOP */
+.shop-section { text-align: center; background: linear-gradient(180deg, transparent 0%, rgba(255,170,0,0.03) 50%, transparent 100%); }
+.shop-banner {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255,170,0,0.1), rgba(255,107,0,0.1));
+  border: 2px solid rgba(255,170,0,0.3);
+  border-radius: 24px; padding: 60px 80px;
+  animation: glow 4s ease-in-out infinite; transition: all 0.4s;
+}
+.shop-banner:hover { transform: scale(1.02); border-color: rgba(255,170,0,0.6); }
+.shop-banner h3 { font-size: 2rem; font-weight: 800; margin-bottom: 15px; color: #ffaa00; }
+.shop-banner p { color: rgba(255,255,255,0.6); margin-bottom: 30px; font-size: 1.05rem; }
+.shop-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffaa00, #ff6b00);
+  color: #0a0a1a; padding: 18px 50px; border-radius: 14px;
+  font-size: 1.15rem; font-weight: 700; text-decoration: none;
+  transition: all 0.3s; letter-spacing: 1px; text-transform: uppercase;
+}
+.shop-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 15px 40px rgba(255,170,0,0.3); }
+
+/* FOOTER */
+footer {
+  text-align: center; padding: 40px 20px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.3); font-size: 0.9rem;
+}
+footer span { color: #ffaa00; }
+
+/* NOTIFICATION */
+.notification {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: rgba(0,0,0,0.9); color: #66ff66; padding: 14px 28px;
+  border-radius: 12px; border: 1px solid rgba(100,255,100,0.2);
+  font-weight: 600; font-size: 0.95rem; opacity: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: none; z-index: 100; backdrop-filter: blur(10px);
+}
+.notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .server-logo { font-size: 2.8rem; }
+  .ip-box { flex-direction: column; padding: 15px 20px; }
+  .ip-box .ip-address { font-size: 1.3rem; }
+  .section-title { font-size: 1.8rem; }
+  .rule-section-header { padding: 18px 20px; }
+  .rule-items { padding: 0 20px 20px; }
+  .rule-section-header h3 { font-size: 1rem; }
+  .shop-banner { padding: 40px 25px; }
+  .shop-banner h3 { font-size: 1.5rem; }
+  .shop-btn { padding: 14px 30px; font-size: 1rem; }
+  .mod-list { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="parallax-bg"></div>
+<div class="stars" id="stars"></div>
+<div class="floating-blocks">
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+  <div class="floating-block"></div>
+</div>
+
+<div class="notification" id="notif"></div>
+
+<header>
+  <div class="server-logo">TollyWorld</div>
+  <div class="server-subtitle">Minecraft Server</div>
+
+  <div class="ip-box">
+    <div>
+      <div class="ip-label">IP-адрес сервера</div>
+      <div class="ip-address">TollyWorld.ru-cc.ru</div>
+    </div>
+    <button class="copy-btn" onclick="copyIP()">Копировать</button>
+  </div>
+
+  <div class="scroll-down">
+    <a href="#rules">↓</a>
+  </div>
+</header>
+
+<section id="rules">
+  <div class="container">
+    <h2 class="section-title">Правила сервера</h2>
+    <p class="section-subtitle">Незнание правил не освобождает от ответственности</p>
+
+    <div class="rules-nav" id="rulesNav"></div>
+
+    <div id="rulesContainer">
+
+      <!-- 1. ОБЩИЕ ПОЛОЖЕНИЯ -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">1.</span> Общие положения</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>1.1</strong> Данный свод правил составлен представителем проекта ReallyWorld и действителен на всех игровых режимах проекта ReallyWorld. Незнание правил не освобождает нарушителя от ответственности, а также может усугубить наказание.</div>
+            <div class="rule-item"><strong>1.2</strong> Проект ReallyWorld — комплекс серверов, расположенных по адресам: mc.reallyworld.ru, mc.playrw.ru, mc.reallyworld.me, mc.reallyworld.online, mc.reallyworld.org. Все остальные домены таковыми не являются. Регистрируясь на нашем проекте, вы автоматически принимаете данные правила, а также правила других режимов.</div>
+            <div class="rule-item"><strong>1.3</strong> Правила могут быть изменены без явного оповещения основной аудитории проекта. При значительных изменениях правил, на форуме проекта отображается объявление.</div>
+            <div class="rule-item"><strong>1.4</strong> Решения и действия главной администрации (MrDomer, KondrMS, _TheUuni_, CakyraSun, AngelForch, Shukurinay) не обсуждаются и не поддаются разжалованию. Главная администрация вправе выдавать наказания вне рамок данных правил.</div>
+            <div class="rule-item"><strong>1.5</strong> Администрация сервера не выдаёт игровые ресурсы/компенсации за их потерю в результате кика сервера, лагов/багов, а также действия игроков, использующие запрещённое ПО (читы).</div>
+            <div class="rule-item"><strong>1.6</strong> Продажа, взломы, попытки взломов, передачи аккаунтов, покупки аккаунтов в обход официального сайта, распространение данных игроков, вред серверу, а так же продажи/покупки чего либо за реальную валюту — строго запрещены. <span class="badge perm">Отключение всех аккаунтов без возможности разбана</span> Соучастие, содействие, совместная игра с нарушителями так же попадают под это правило. Аккаунты с которых был нанесен серьезный вред проекту — не подлежат восстановлению, даже если аккаунт был в тот момент взломан или добровольно передан или продан. Ответственность несет владелец аккаунта, независимо от того, кто совершал действия под данным аккаунтом.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ПРАВИЛА РЕГИСТРАЦИИ -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">2.</span> Правила регистрации</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>2.1</strong> Никнейм пользователя должен быть корректным. Некорректным можно назвать любой ник, нарушающий закрепленные правила:<br>
+              <span class="badge">Блокировка аккаунта</span> <span class="badge warn">Для сменённых — предупреждение, затем блокировка</span>
+            </div>
+            <div class="rule-item"><strong>2.1.1</strong> Никнейм, похожий на никнейм высшей Администрации (исключение — никнеймы ютуберов проекта).</div>
+            <div class="rule-item"><strong>2.1.2</strong> Никнейм сексуального, аморального содержания (название половых органов, процессов и пр.).</div>
+            <div class="rule-item"><strong>2.1.3</strong> Никнейм, оскорбляющий никнейм другого игрока.</div>
+            <div class="rule-item"><strong>2.1.4</strong> Никнейм, содержащий названия запрещенных ПО (пример: Celestial777).</div>
+            <div class="rule-item"><strong>2.1.5</strong> Никнейм, содержащий грубые матерные слова.</div>
+            <div class="rule-item"><strong>2.2</strong> При покупке платных дополнительных возможностей (групп), кейсов, рилликов, предоставленный системой чек необходимо сохранить.</div>
+            <div class="rule-item"><strong>2.3</strong> При утере/взломе аккаунта, необходимо обратиться к техподдержке. Если ваш аккаунт был привязан, вы можете восстановить его самостоятельно. Без электронного чека в оказании услуги в восстановлении будет отказано. Повторную отправку чека проект не предоставляет в целях безопасности. Ссылка на техподдержку проекта — https://vk.com/reallyworld_tech</div>
+            <div class="rule-item"><strong>2.3.1</strong> Безопасность аккаунта не гарантируется проектом, процедура по обеспечению безопасности полностью лежит на плечах игрока, и в случае утери аккаунта, администрация в праве отказать в восстановлении аккаунта, а также может полностью обнулить аккаунт и заблокировать если с аккаунта нанесли серьезный вред проекту и его интеллектуальным правам.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. ПРИОБРЕТЕНИЕ ПЛАТНЫХ УСЛУГ -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">3.</span> Приобретение платных услуг</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>3.1</strong> Игра на проекте не подразумевает платы за использование ресурсов ReallyWorld.</div>
+            <div class="rule-item"><strong>3.2</strong> Игрок вправе добровольно оплатить определённую сумму проекту за внутриигровую услугу в одностороннем порядке.</div>
+            <div class="rule-item"><strong>3.3</strong> При ошибке платежа, либо отсутствия внутриигровой услуги после оплаты, необходимо обращаться в техподдержку при наличии электронного чека который приходит на указанную почту. Без электронного чека в оказании услуги в восстановлении будет отказано. Повторную отправку чека проект не предоставляет в целях безопасности. Чек необходимо сохранять в момент оплаты или найти на электронной почте.</div>
+            <div class="rule-item"><strong>3.4</strong> Возврата средств за покупки у нас нету, так как ReallyWorld не является коммерческой организацией и все покупки являются добровольными пожертвованиями на развитие сервера.</div>
+            <div class="rule-item"><strong>3.6</strong> Покупка платных групп не даёт привилегии на игнорирование/нарушение данных правил.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. ВНУТРИИГРОВОЕ ОБЩЕНИЕ -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">4.</span> Внутриигровое общение</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>4.1</strong> Запрещено флудить, отправлять больше 2-ух похожих по смыслу, или одинаковых сообщения подряд (2 сообщения можно, 3 нельзя) (за одну минуту). <span class="badge">Мут на 4 часа</span></div>
+            <div class="rule-item"><strong>4.1.1</strong> Запрещено согласовывать с другими игроками или использовать свои твинки для отправки одного и того же сообщения в короткий промежуток времени, иными словами, обходить наказание за флуд, используя третьи аккаунты. <span class="badge">Мут каждому участнику на 4 часа</span></div>
+            <div class="rule-item"><strong>4.1.2</strong> Запрещено использовать объявления для обхода наказания за флуд (использовать 2 /bc и сообщение в глобал, или наоборот, 2 сообщения и 1 /bc). <span class="badge">Мут на 6 часов</span></div>
+            <div class="rule-item"><strong>4.2</strong> Запрещено флудить символами, т.е. использовать комбинации бессмысленных символов, по типу "!!!!!!!!!!!!!!!!", или же смеха. <span class="badge">Мут на 4 часа, более 10 символов</span></div>
+            <div class="rule-item"><strong>4.2.1</strong> Злоупотребление капсом, если в предложении (состоящем не менее чем из 3-х слов) — больше 50% написано в Caps'е. <span class="badge">Мут на 4 часа</span></div>
+            <div class="rule-item"><strong>4.3</strong> Запрещено организовывать флуд опросами, по типу "отправьте + в чат". Исключение — просьба приютить/продать или обменять ресурсы. Также исключениями из этого правила являются сообщения следующего типа: "кто примет в клан + в чат/кто дуэль + в чат/кто выживать вместе+ в чат". <span class="badge">Мут на 4 часа</span></div>
+            <div class="rule-item"><strong>4.3.1</strong> Если при организации флуда, на ваше сообщение ответило 6 и более человек, то вам выдаётся мут на 6 часов. <span class="badge">Мут на 6 часов</span></div>
+            <div class="rule-item"><strong>4.4</strong> Неадекватное поведение, чрезмерные оскорбления и агрессия. <span class="badge">Мут на 12 часов</span></div>
+            <div class="rule-item"><strong>4.4.1</strong> Оскорбления, унижения, угрозы к участникам сервера, игрокам (даже без указания конкретного игрока/Упоминание/затрагивание расы — исключение). <span class="badge">Мут на 4 часа</span></div>
+            <div class="rule-item"><strong>4.4.2</strong> Злоупотребление нецензурной лексикой. <span class="badge">Мут на 3 часа</span></div>
+            <div class="rule-item"><strong>4.4.3</strong> Аморальное поведение, темы для совершеннолетних. <span class="badge">Мут на 3 часа</span></div>
+            <div class="rule-item"><strong>4.4.4</strong> Призывы к суициду. <span class="badge">Мут на 6 часов</span></div>
+            <div class="rule-item"><strong>4.5</strong> Оскорбление проекта, унижение проекта, оскорбительные названия. Любой вид чата. <span class="badge">Бан на 30 дней</span></div>
+            <div class="rule-item"><strong>4.5.1</strong> Публичная критика проекта в общем чате. <span class="badge">Мут на 3 дня</span></div>
+            <div class="rule-item"><strong>4.6</strong> Выпрашивание снятия, выдачи наказаний у Администрации. Выпрашивание у MrDomer — исключение. <span class="badge">Мут на 2 часа</span></div>
+            <div class="rule-item"><strong>4.6.1</strong> Выпрашивание ресурсов у персонала проекта. Выпрашивание у MrDomer — исключение. <span class="badge">Мут на 1 час</span></div>
+            <div class="rule-item"><strong>4.7</strong> Дезинформация игроков проекта неофициальной информацией, внутриигровой информацией. "Скоро вайп" — исключение. <span class="badge">Мут на 12 часов / 4 дня</span></div>
+            <div class="rule-item"><strong>4.7.1</strong> Вне-игровой обман игроков. Например, сочетаниями клавиш Alt+F4 или зажатием клавиш F3 + C. <span class="badge">Мут на 6 часов</span></div>
+            <div class="rule-item"><strong>4.8</strong> Запрещено упоминание сторонних проектов ресурсов, групп, соцсетей и подобного. <span class="badge">Мут 1 день</span> Обход правила: <span class="badge">Мут на 3 дня</span></div>
+            <div class="rule-item"><strong>4.8.1</strong> Любое упоминание Discord/Telegram-контактов. Исключение: личные сообщения, локальный чат с модератором. <span class="badge">Бан на 2 дня</span></div>
+            <div class="rule-item"><strong>4.8.2</strong> Реклама сторонних проектов (обход данного правила). Любой вид чата. <span class="badge perm">Бан перманентно</span></div>
+            <div class="rule-item"><strong>4.8.3</strong> Реклама в Личных сообщениях, попытка обойти наказание в глобальном чате. <span class="badge">Бан на 60 дней</span></div>
+            <div class="rule-item"><strong>4.8.4</strong> Распространение вредоносных ссылок (скримеры, стиллеры, платные краткие ссылки). <span class="badge">Бан на 14 дней</span></div>
+            <div class="rule-item"><strong>4.9</strong> Оскорбление родителей, некорректное обращение к родителям любого игрока, оскорбительные упоминания. <span class="badge">Мут на 5 дней за упоминание, на 15 дней за оскорбление</span></div>
+            <div class="rule-item"><strong>4.9.1</strong> Оскорбление своих родителей. <span class="badge">Мут на 5 дней</span></div>
+            <div class="rule-item"><strong>4.10</strong> Затрагивание политики, политическая агитация. <span class="badge">Бан на 3 дня / 7 дней</span> или <span class="badge">Мут на 2 дня</span></div>
+            <div class="rule-item"><strong>4.11</strong> Выдача себя за администрацию проекта. <span class="badge">Бан на 3 дня</span></div>
+            <div class="rule-item"><strong>4.11.1</strong> Угрозы баном/киком/мутом. <span class="badge">Бан на 12 часов</span></div>
+            <div class="rule-item"><strong>4.12</strong> Оскорбление модерации и администрации. Любой вид чата. <span class="badge">Бан на 5 / 15 дней</span></div>
+            <div class="rule-item"><strong>4.12.1</strong> Оскорбление родных администрации. Любой вид чата. <span class="badge">Бан на 20 дней</span></div>
+            <div class="rule-item"><strong>4.12.2</strong> Шутки или рофлы в сторону администрации, состава проекта. <span class="badge">Бан на 2 дня</span></div>
+            <div class="rule-item"><strong>4.12.3</strong> Неуважительное/неадекватное общение с администрацией. <span class="badge">Мут на 12 часов</span></div>
+            <div class="rule-item"><strong>4.12.4</strong> Угроза администрации снятием, угроза наказанием. <span class="badge">Мут на 4 часа</span></div>
+            <div class="rule-item"><strong>4.13</strong> Оскорбление ютуберов проекта. Любой вид чата. <span class="badge">Бан на 5 / 15 дней</span></div>
+            <div class="rule-item"><strong>4.13.1</strong> Шутки или рофлы в сторону ютуберов проекта. <span class="badge">Бан на 2 дня</span></div>
+            <div class="rule-item"><strong>4.13.2</strong> Неадекватное общение с ютуберами проекта. <span class="badge">Мут на 12 часов</span></div>
+            <div class="rule-item"><strong>4.13.3</strong> Оскорбление родных ютуберов. Любой вид чата. <span class="badge">Бан на 20 дней</span></div>
+            <div class="rule-item"><strong>4.14</strong> Пропаганда нацизма/расизма, табакокурения, наркотиков, оружия. <span class="badge">Бан на 3 дня</span></div>
+            <div class="rule-item"><strong>4.14.1</strong> Пропаганда терроризма. <span class="badge">Бан на 7 дней</span></div>
+            <div class="rule-item"><strong>4.15</strong> Бартер между играми. <span class="badge">Бан на 4 дня</span></div>
+            <div class="rule-item"><strong>4.16</strong> Распространение личных данных игроков (доксинг, сватинг). Угрозы также сюда относятся. <span class="badge">Бан на 30 дней / Отключение аккаунта</span></div>
+            <div class="rule-item"><strong>4.16.1</strong> Доксинг, сватинг и подобные нарушения в сторону сотрудника сервера. <span class="badge perm">Отключение аккаунта</span></div>
+            <div class="rule-item"><strong>4.17</strong> Провокация игроков на нарушение правил. <span class="badge">Бан на 2 дня / 4 дня</span></div>
+            <div class="rule-item"><strong>4.18</strong> Любое упоминание денежных операций с реальной валютой любой размерности. <span class="badge">Мут на 2 дня</span></div>
+            <div class="rule-item"><strong>4.19</strong> Музыка/посторонние звуки (кроме голоса игрока) в голосовой чат. <span class="badge">Мут на 6 часов</span></div>
+            <div class="rule-item"><strong>4.20</strong> Мошенничество, связанное с реальной жизнью. Любой вид чата. <span class="badge">Бан на 15 дней</span></div>
+            <div class="rule-item"><strong>4.21</strong> Оскорбление чувств верующих. <span class="badge">Бан на 3 дня</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. ЗАПРЕТЫ ПО ИСПОЛЬЗОВАНИЮ ПО -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">5.</span> Запреты на использование ПО</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>5.2</strong> Использование вредоносного, читерского ПО, получение преимущества над игроками. <span class="badge">Бан на 50 дней</span> + снос основного дома + возможное отключение аккаунта (на усмотрение администрации).</div>
+            <div class="rule-item"><strong>5.2.1</strong> Совместная игра с игроком, нарушившим пункт 5.2. <span class="badge">Бан на 47 дней</span></div>
+            <div class="rule-item"><strong>5.2.2</strong> Признание на проверке. <span class="badge">Бан на 46 дней</span></div>
+            <div class="rule-item"><strong>5.2.3</strong> Признание в наличии читов (в любом виде чата). <span class="badge">Бан на 10 дней</span></div>
+            <div class="rule-item"><strong>5.2.4</strong> Обход блокировки аккаунта. Считается вход с любого аккаунта, после уже имеющейся блокировки. Любые попытки обойти правило 5.2.4 будут квалифицироваться как обход бана. <span class="badge">Бан на 70 дней</span></div>
+            <div class="rule-item"><strong>5.2.5</strong> Читы удалены менее 14 дней назад. <span class="badge">Бан на 50 дней</span></div>
+            <div class="rule-item"><strong>5.2.5.1</strong> Запрещено хранить у себя читы, любое хранение читов. <span class="badge">Бан на 50 дней</span></div>
+            <div class="rule-item"><strong>5.2.6</strong> Использование Auto-копателей или лесорубов. <span class="badge">Бан на 5 дней</span></div>
+            <div class="rule-item"><strong>5.2.7</strong> Использование ботов, макросов, плагинов позволяющих автоматизировать сложные игровые процессы. <span class="badge">Бан на 15 дней</span> Единственный пример: бот казино с фармом валюты.</div>
+            <div class="rule-item"><strong>5.2.8</strong> Неадекватное поведение на проверке. Сюда относятся различные фейк папки с названиями читов, шутки, рофлы в сторону администрации, попытка выпросить разбан или чтобы не банили, вопросы не по теме проверки. <span class="badge">Бан на 50 дней</span></div>
+            <div class="rule-item"><strong>5.2.9</strong> Использование виртуальных машин при проверке, различные манипуляции с обязательными программами для проверки, доступом к локальным дискам (ничего из этого не открывается, пишет "администратор ограничил доступ", просит пин-код, родительский контроль и т.д.) — попытка обхода проверки. <span class="badge">Бан на 50 дней</span></div>
+            <div class="rule-item"><strong>5.2.10</strong> Использование макросов, запрещённых модов, кликеров (кроме фармилок). <span class="badge">Бан на 5 / 7 / 15 / 30 / 50 дней</span></div>
+            <div class="rule-item"><strong>5.2.11</strong> Использование .bat (батников) на чистку. <span class="badge">Бан на 50 дней</span></div>
+            <div class="rule-item"><strong>5.2.11.1</strong> Запрещено хранить у себя .bat (батники) на очистку. <span class="badge">Бан на 20 дней</span></div>
+
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,100,100,0.08); border-radius: 12px; border: 1px solid rgba(255,100,100,0.15);">
+              <strong style="color: #ff6b6b; font-size: 1.05rem;">Список запрещённых модов</strong>
+              <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin: 6px 0 12px;">Любые модификации, которые являются интерпретацией чит-функции</p>
+              <div class="mod-list">
+                <div class="mod-item"><span class="mod-name">ElytraSwap</span><span class="mod-punish">5 дней</span></div>
+                <div class="mod-item"><span class="mod-name">ArmorHotSwap</span><span class="mod-punish">5 дней</span></div>
+                <div class="mod-item"><span class="mod-name">Slippery Mod</span><span class="mod-punish">50 дней</span></div>
+                <div class="mod-item"><span class="mod-name">StepUp Mod</span><span class="mod-punish">30 дней</span></div>
+                <div class="mod-item"><span class="mod-name">AFK-Fish Mod</span><span class="mod-punish">5 дней</span></div>
+                <div class="mod-item"><span class="mod-name">InvMove</span><span class="mod-punish">7 дней</span></div>
+                <div class="mod-item"><span class="mod-name">Inventory Totem</span><span class="mod-punish">50 дней</span></div>
+                <div class="mod-item"><span class="mod-name">TopkaAutoBuy v1, v2</span><span class="mod-punish">7 дней</span></div>
+                <div class="mod-item"><span class="mod-name">GoProne</span><span class="mod-punish">15 дней</span></div>
+                <div class="mod-item"><span class="mod-name">CleanCut</span><span class="mod-punish">15 дней</span></div>
+                <div class="mod-item"><span class="mod-name">Grass Bypass</span><span class="mod-punish">15 дней</span></div>
+                <div class="mod-item"><span class="mod-name">TopkaCasino</span><span class="mod-punish">15 дней</span></div>
+                <div class="mod-item"><span class="mod-name">Моды на изменение хитбоксов</span><span class="mod-punish">15 дней</span></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 15px; padding: 15px; background: rgba(255,50,50,0.08); border-radius: 12px; border: 1px solid rgba(255,50,50,0.15);">
+              <strong style="color: #ff3333; font-size: 1.05rem;">Запрещённые моды (расцениваются как читы — 50 дней бана)</strong>
+              <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin: 6px 0 12px;">Любые модификации, которые являются интерпретацией чит-функции</p>
+              <div class="mod-list">
+                <div class="mod-item cheat"><span class="mod-name">Aim Assistance</span></div>
+                <div class="mod-item cheat"><span class="mod-name">Auto Look</span></div>
+                <div class="mod-item cheat"><span class="mod-name">Zergatul.cheatutils</span></div>
+                <div class="mod-item cheat"><span class="mod-name">DiamondSim</span></div>
+                <div class="mod-item cheat"><span class="mod-name">X-ray Mod</span></div>
+                <div class="mod-item cheat"><span class="mod-name">Chest Locator</span></div>
+                <div class="mod-item cheat"><span class="mod-name">ChestESP</span></div>
+                <div class="mod-item cheat"><span class="mod-name">Entity/Player X-Ray</span></div>
+                <div class="mod-item cheat"><span class="mod-name">Spawner Locator</span></div>
+                <div class="mod-item cheat"><span class="mod-name">AutoAttack</span></div>
+                <div class="mod-item cheat"><span class="mod-name">InventoryProfilesNext</span></div>
+                <div class="mod-item cheat"><span class="mod-name">Baritone/Fabritone</span></div>
+                <div class="mod-item cheat"><span class="mod-name">NoClipFlyMod</span></div>
+                <div class="mod-item cheat"><span class="mod-name">FreeCam</span></div>
+                <div class="mod-item cheat"><span class="mod-name">PlayerHighlighter</span></div>
+                <div class="mod-item cheat"><span class="mod-name">ClickCrystal 1.19.4 / 1.16.5</span></div>
+                <div class="mod-item cheat"><span class="mod-name">AutoClicky</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. ИГРОВОЙ ПРОЦЕСС -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">6.</span> Игровой процесс и прочее</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>6.1</strong> Запрещено причинение вреда проекту: заливы, лаг-машины, багоюз, дюпы.</div>
+            <div class="rule-item"><strong>6.1.1</strong> Создание заливов и использование багов сервера. <span class="badge">Бан на 25 дней</span></div>
+            <div class="rule-item"><strong>6.1.1.2</strong> Багоюз. <span class="badge">Бан на 15 дней</span></div>
+            <div class="rule-item"><strong>6.1.2</strong> Создание лаг-машин и всего того, что может нанести вред работоспособности сервера. <span class="badge perm">Отключение аккаунта</span></div>
+            <div class="rule-item"><strong>6.1.3</strong> Запрещено строительство ловушек без возможности выхода за счёт ограничений, выдвинутых сервером. Например, использование стоек для брони, рамок, снега и песка душ. <span class="badge">Бан на 25 дней + снос дома/части дома</span></div>
+            <div class="rule-item"><strong>6.1.4</strong> Использование и распространение дюпов. <span class="badge perm">Отключение аккаунта</span></div>
+            <div class="rule-item"><strong>6.1.5</strong> Помеха работе персонала. Например, "Я по рофлу написал спек". <span class="badge">Бан на 6 часов</span></div>
+            <div class="rule-item"><strong>6.2</strong> Флуд командами. Например, /pay Gallohad 1 (более 12 раз). <span class="badge">Кик, далее бан на 12 часов</span></div>
+            <div class="rule-item"><strong>6.3</strong> Некорректный текст, нарушающий правила чата на табличках, регионах, книгах. <span class="badge">Бан на 5 / 15 / 30 дней</span></div>
+            <div class="rule-item"><strong>6.4</strong> Запрещено подавать жалобу на высшую администрацию с оскорблениями. <span class="badge">Бан на 5 дней</span></div>
+            <div class="rule-item"><strong>6.5</strong> Запрещена реклама, продажа, распространение читов, магазинов, дискорд каналов, групп которые связаны с продажей, взломом, обменом ресурсов. <span class="badge perm">Перманентная блокировка аккаунта</span></div>
+            <div class="rule-item"><strong>6.6</strong> Создание кланов с нарушением правил чата (оскорбления, аморальное содержание, политический контекст, пропаганда чего-либо). <span class="badge">Удаление клана, блокировка аккаунта основателя на 15 дней</span></div>
+            <div class="rule-item"><strong>6.7</strong> Помеха проведению проверки. <span class="badge">Бан на 10 дней</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. ПРАВА МОДЕРАЦИИ НА ПРОВЕРКЕ -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">7.</span> Права модерации на проверке</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>7.1</strong> Модерация имеет право вызвать через Anydesk, проверка производится только по регламенту reallyworld.ru/anydesk.</div>
+            <div class="rule-item"><strong>7.1.1</strong> Модерация не имеет право просить полный доступ в Anydesk. Только доступ к мышке и клавиатуре.</div>
+            <div class="rule-item"><strong>7.2</strong> Проверка проводится исключительно через компьютер, никаких телефонов. Модерация не имеет право скидывать различные программы со своего компьютера. Все программы для проверки на читы скачиваются самостоятельно в браузере.<br><br>
+            <strong>Обязательные:</strong> SystemInformer, Everything, RecentFilesView, ShellbagAnalyzer, RegScanner, JournalTrace<br>
+            <strong>Необязательные (разрешённые):</strong> Recaf, JD-gui, JumplistsView, BrowsersDownloadsView, WinPrefetchView, Recuva.<br>
+            <em style="color: rgba(255,255,255,0.4); font-size: 0.85rem;">Скачивайте только с официальных сайтов или GitHub по первой ссылке.</em>
+            </div>
+            <div class="rule-item"><strong>7.3</strong> Модераторы с повышенным доверием (moder+) и выше по должности имеют право проверить ваш FunPay и другие сайты на которых можно размещать ресурсы за реальную валюту.</div>
+            <div class="rule-item"><strong>7.4</strong> Проверка производится только через программу Anydesk. Скачивать программы для проверок нужно только с официального сайта, модерация не имеет право скидывать вам файл и просить его скачать.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. ПРАВИЛА ДЛЯ ДОНАТЕРОВ -->
+      <div class="rule-section">
+        <div class="rule-section-header" onclick="toggleSection(this)">
+          <h3><span class="num">8.</span> Правила для донатеров</h3>
+          <span class="toggle">▾</span>
+        </div>
+        <div class="rule-section-body">
+          <div class="rule-items">
+            <div class="rule-item"><strong>8.1</strong> Использование /bc не по назначению, нарушение правил в пунктах 4 раздела. <span class="badge">Бан от 1 до 4 дней</span></div>
+            <div class="rule-item"><strong>8.2</strong> Кастомный префикс должен соответствовать всем правилам сервера. Запрещено создавать префиксы оскорбительного характера, а также префиксы с помощью которых можно выдавать себя за администрацию, например: Helper, Moder, Admin, Owner, Deweloper, Support и т.д. После покупки кастомного префикса, он должен пройти модерацию и после этого перейдет в ваше распоряжение. В случае отказа — вам не вернут риллики, делайте префиксы в пределах разумного. <span class="badge warn">Отказ в выдаче кастомного префикса</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="shop-section" id="shop">
+  <div class="container">
+    <h2 class="section-title">Донат Магазин</h2>
+    <p class="section-subtitle">Поддержи сервер и получи крутые привилегии</p>
+    <div class="shop-banner">
+      <h3>TollyWorld Shop</h3>
+      <p>Кейсы, привилегии, титулы и многое другое</p>
+      <a href="https://tollyworldshop.trademc.org/" class="shop-btn" target="_blank">Перейти в магазин</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>TollyWorld &mdash; Minecraft Server &bull; TollyWorld.ru-cc.ru</p>
+  <p style="margin-top:8px">Сделано с <span>♥</span> для наших игроков</p>
+</footer>
+
+<script>
+function copyIP() {
+  navigator.clipboard.writeText('TollyWorld.ru-cc.ru').then(() => {
+    showNotif('IP-адрес скопирован!');
+  });
+}
+
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2000);
+}
+
+function toggleSection(header) {
+  header.parentElement.classList.toggle('active');
+}
+
+document.querySelectorAll('.rule-section').forEach((el, i) => {
+  if (i === 0) el.classList.add('active');
+});
+
+const starsContainer = document.getElementById('stars');
+for (let i = 0; i < 200; i++) {
+  const star = document.createElement('div');
+  star.className = 'star';
+  star.style.left = Math.random() * 100 + '%';
+  star.style.top = Math.random() * 100 + '%';
+  star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+  star.style.animationDelay = Math.random() * 5 + 's';
+  star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+  starsContainer.appendChild(star);
+}
+
+const nav = document.getElementById('rulesNav');
+const sections = document.querySelectorAll('.rule-section');
+sections.forEach((sec, i) => {
+  const h3 = sec.querySelector('h3');
+  const text = h3.textContent.trim();
+  const short = text.length > 30 ? text.substring(0, 30) + '…' : text;
+  const a = document.createElement('a');
+  a.href = '#';
+  a.textContent = short;
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    sec.classList.toggle('active');
+    sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  nav.appendChild(a);
+});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.animationPlayState = 'running';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.rule-section').forEach(el => {
+  el.style.animationPlayState = 'paused';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>
