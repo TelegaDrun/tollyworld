@@ -2,7 +2,10 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>TollyWorld — Minecraft Server</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -289,19 +292,80 @@ footer span { color: #ffaa00; }
 }
 .notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* MOBILE BOTTOM NAV */
+.mobile-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(10,10,26,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  z-index: 1000;
+  padding: 8px 0 env(safe-area-inset-bottom, 8px);
+  justify-content: space-around;
+}
+.mobile-nav a {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; text-decoration: none; color: rgba(255,255,255,0.4);
+  font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 4px 8px; transition: color 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav a .nav-icon {
+  font-size: 1.3rem; line-height: 1;
+}
+.mobile-nav a.active { color: #ffaa00; }
+.mobile-nav a:active { opacity: 0.6; }
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .server-logo { font-size: 2.8rem; }
   .ip-box { flex-direction: column; padding: 15px 20px; }
   .ip-box .ip-address { font-size: 1.3rem; }
   .section-title { font-size: 1.8rem; }
-  .rule-section-header { padding: 18px 20px; }
-  .rule-items { padding: 0 20px 20px; }
-  .rule-section-header h3 { font-size: 1rem; }
+  .rule-section-header { padding: 14px 16px; }
+  .rule-items { padding: 0 16px 20px; }
+  .rule-section-header h3 { font-size: 0.95rem; gap: 8px; }
   .shop-banner { padding: 40px 25px; }
   .shop-banner h3 { font-size: 1.5rem; }
   .shop-btn { padding: 14px 30px; font-size: 1rem; }
   .mod-list { grid-template-columns: 1fr; }
+  .rule-item { font-size: 0.88rem; padding: 8px 0; }
+  .rule-section-header .toggle { font-size: 1.1rem; }
+  .section-subtitle { font-size: 0.95rem; margin-bottom: 30px; }
+
+  section { padding: 50px 0; }
+  .rules-nav { gap: 6px; }
+  .rules-nav a { font-size: 0.75rem; padding: 7px 12px; }
+  .server-subtitle { font-size: 1rem; letter-spacing: 2px; }
+  header { padding: 30px 16px; }
+
+  .mobile-nav { display: flex; }
+  footer { padding-bottom: 70px; }
+
+  .rule-section-body .rule-items > div[style] { padding: 12px !important; }
+  .rule-section-body .rule-items > div[style] .mod-list { gap: 5px; }
+  .rule-section-body .rule-items > div[style] .mod-item { font-size: 0.8rem; padding: 6px 10px; }
+}
+
+@media (max-width: 420px) {
+  .server-logo { font-size: 2.2rem; }
+  .ip-box .ip-address { font-size: 1.1rem; }
+  .ip-box { padding: 12px 16px; gap: 10px; }
+  .section-title { font-size: 1.5rem; }
+  .rule-section-header h3 { font-size: 0.88rem; }
+  .shop-banner { padding: 30px 16px; }
+  .shop-btn { padding: 12px 24px; font-size: 0.9rem; }
+  .rules-nav a { font-size: 0.7rem; padding: 6px 10px; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .rule-section-header { padding: 16px; }
+  .rule-section-header:hover { background: transparent; }
+  .ip-box:hover { transform: none; }
+  .shop-banner:hover { transform: none; }
+  .shop-btn:hover { transform: none; box-shadow: none; }
+  .rule-section:hover { border-color: rgba(255,255,255,0.06); }
 }
 </style>
 </head>
@@ -323,6 +387,21 @@ footer span { color: #ffaa00; }
 </div>
 
 <div class="notification" id="notif"></div>
+
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#rules" class="active" data-target="rules">
+    <span class="nav-icon">📋</span>
+    Правила
+  </a>
+  <a href="#shop" data-target="shop">
+    <span class="nav-icon">🏪</span>
+    Магазин
+  </a>
+  <a href="#" onclick="copyIP(); return false;" data-target="ip">
+    <span class="nav-icon">🔗</span>
+    IP
+  </a>
+</nav>
 
 <header>
   <div class="server-logo">TollyWorld</div>
@@ -680,6 +759,38 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.rule-section').forEach(el => {
   el.style.animationPlayState = 'paused';
   observer.observe(el);
+});
+
+// Mobile nav active state
+const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
+mobileNavLinks.forEach(link => {
+  link.addEventListener('click', function() {
+    mobileNavLinks.forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Close accordion sections when clicking outside on mobile
+document.addEventListener('click', function(e) {
+  if (window.innerWidth > 768) return;
+  const section = e.target.closest('.rule-section');
+  document.querySelectorAll('.rule-section.active').forEach(el => {
+    if (el !== section) el.classList.remove('active');
+  });
+});
+
+// Smooth scroll offset for fixed nav on mobile
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href === '#') return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    e.preventDefault();
+    const offset = window.innerWidth <= 768 ? 20 : 0;
+    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
 });
 </script>
 
